@@ -1,0 +1,5 @@
+downloaded_assets/
+raw_*.html
+.gemini/
+*.pyc
+__pycache__/
