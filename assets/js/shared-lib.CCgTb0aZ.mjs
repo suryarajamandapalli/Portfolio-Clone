@@ -1,2 +1,2 @@
-import{t as e}from"./rolldown-runtime.C4p97ucE.mjs";function t(e,t){return{description:`Welcome to my portfolio`,favicon:`../fonts/WTDB128knyhJZWbqx1wHJGZqVo.png`,robots:`max-image-preview:large`,title:`Sanjay's Portfolio`}}var n=e((()=>{}));export{t as n,n as t};
+import{t as e}from"./rolldown-runtime.C4p97ucE.mjs";function t(e,t){return{description:`Welcome to my portfolio`,favicon:`/assets/fonts/WTDB128knyhJZWbqx1wHJGZqVo.png`,robots:`max-image-preview:large`,title:`Sanjay's Portfolio`}}var n=e((()=>{}));export{t as n,n as t};
 //# sourceMappingURL=shared-lib.CCgTb0aZ.mjs.map

@@ -3,3 +3,5 @@ raw_*.html
 .gemini/
 *.pyc
 __pycache__/
+
+.vercel

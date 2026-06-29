@@ -1,20 +1,22 @@
 import os
 import re
-from urllib.parse import urlparse
 
 dist_dir = r"C:\Users\surya\Documents\antigravity\keen-pythagoras"
 
 def resolve_path(base_file, ref_path):
-    # If ref_path is an absolute URL or external, ignore
     if ref_path.startswith(('http://', 'https://', 'data:', '//')):
         return None
         
-    # Remove query parameters or hashes
     ref_path = ref_path.split('?')[0].split('#')[0]
     
-    # Resolve relative path
-    base_dir = os.path.dirname(base_file)
-    resolved = os.path.abspath(os.path.join(base_dir, ref_path))
+    if ref_path.startswith('/'):
+        # Root-relative path, resolve relative to dist_dir
+        resolved = os.path.abspath(os.path.join(dist_dir, ref_path.lstrip('/')))
+    else:
+        # Relative path, resolve relative to the file's directory
+        base_dir = os.path.dirname(base_file)
+        resolved = os.path.abspath(os.path.join(base_dir, ref_path))
+        
     return resolved
 
 def check_html(html_path):
@@ -26,7 +28,6 @@ def check_html(html_path):
         
     # Find href, src, and modulepreload links
     refs = re.findall(r'(?:href|src)\s*=\s*["\']([^"\']+)["\']', content)
-    # Also find modulepreload links in scripts if any
     preload_refs = re.findall(r'href\s*:\s*["\']([^"\']+)["\']', content)
     
     all_refs = set(refs + preload_refs)
@@ -47,12 +48,9 @@ def check_js(js_path):
     with open(js_path, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
         
-    # Find imports/exports: e.g. import ... from "./..." or import "./..."
     imports = re.findall(r'(?:import|from)\s*["\']([^"\']+)["\']', content)
-    # Find dynamic imports: import("./...")
     dyn_imports = re.findall(r'import\s*\(\s*["\']([^"\']+)["\']\s*\)', content)
-    # Find asset string references: e.g. "../images/..." or "../fonts/..."
-    assets = re.findall(r'["\'](\.\.[^"\']+)["\']', content)
+    assets = re.findall(r'["\']((?:\.\.|\/assets)[^"\']+)["\']', content)
     
     all_refs = set(imports + dyn_imports + assets)
     
@@ -66,17 +64,25 @@ def check_js(js_path):
     return found_refs, missing
 
 def main():
-    html_path = os.path.join(dist_dir, "index.html")
+    html_files = [
+        "index.html",
+        "resume/index.html",
+        "checkout/index.html",
+        "old-home/index.html"
+    ]
     
-    print("Checking HTML...")
-    html_refs, html_missing = check_html(html_path)
-    print(f"Found {len(html_refs)} local references in index.html.")
-    if html_missing:
-        print("WARNING: Missing files in index.html:")
-        for ref, res in html_missing:
-            print(f"  - {ref} -> {res}")
-    else:
-        print("index.html: All local references OK.")
+    print("Checking HTML files...")
+    for h in html_files:
+        html_path = os.path.join(dist_dir, h)
+        if os.path.exists(html_path):
+            html_refs, html_missing = check_html(html_path)
+            print(f"{h}: Found {len(html_refs)} local references.")
+            if html_missing:
+                print(f"WARNING: Missing files in {h}:")
+                for ref, res in html_missing:
+                    print(f"  - {ref} -> {res}")
+            else:
+                print(f"{h}: OK.")
         
     print("\nChecking JS/MJS files...")
     js_dir = os.path.join(dist_dir, "assets", "js")
